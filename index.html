@@ -5,10 +5,12 @@
     <title>Web Bluetooth</title>
 </head>
 <body>
-    <button id="connect" onclick="onReadKeyButtonClick()">Connect</button>
-    <button id="startNotifications" onclick="onStartNotificationsButtonClick()">Start notifications</button>
-    <button id="stopNotifications" onclick="onStopNotificationsButtonClick()">Stop notifications</button>
+    <button id="connect" onclick="onConnectButtonClick()">Connect</button>
+    <!--button id="startNotifications" onclick="onStartNotificationsButtonClick()">Start notifications</button-->
+    <!--button id="stopNotifications" onclick="onStopNotificationsButtonClick()">Stop notifications</button-->
     <button id="disconnect" onclick="onDisconnectButtonClick()">Disconnect</button>
+    <button id="read" onclick="onReadButtonClick()">Read</button>
+    <button id="read" onclick="onWriteButtonClick()">Write</button>
     <div id="log"></div>
     <script src="index.js"></script>
 </body>

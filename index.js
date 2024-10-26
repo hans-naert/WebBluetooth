@@ -1,8 +1,9 @@
 var bluetoothDevice;
-var keyCharacteristic;
+var readCharacteristic;
 
-const UUID_KEY_SERV = "0000ffe0-0000-1000-8000-00805f9b34fb";
-const UUID_KEY_DATA = "0000ffe1-0000-1000-8000-00805f9b34fb";
+const UUID_SERV_1 = "0000a002-0000-1000-8000-00805f9b34fb";
+const UUID_READ_CHAR = "0000c300-0000-1000-8000-00805f9b34fb";
+const UUID_WRITE_CHAR = "0000c304-0000-1000-8000-00805f9b34fb";
 
 log = (text) => {
     let div = document.createElement('div');
@@ -10,26 +11,44 @@ log = (text) => {
     document.querySelector('#log').appendChild(div);
 }
 
-async function onReadKeyButtonClick() {
+async function onConnectButtonClick() {
     try {
         if (!bluetoothDevice) {
             await requestDevice();
         }
         await connectDeviceAndCacheCharacteristics();
-
-        log('Reading Key...');
-        await keyCharacteristic.readValue();
+        
     } catch (error) {
         log('Argh! ' + error);
     }
 }
+
+async function onReadButtonClick() {
+    try {
+        log('Reading data...');
+        await readCharacteristic.readValue();
+    } catch (error) {
+        log('Argh! ' + error);
+    }
+}
+
+async function onWriteButtonClick() {
+    try {
+        log('Writing data...');
+        let arrayBuffer = new TextEncoder().encode("Hello World");
+        await writeCharacteristic.writeValue(arrayBuffer);
+    } catch (error) {
+        log('Argh! ' + error);
+    }
+}
+
 
 async function requestDevice() {
     log('Requesting any Bluetooth Device...');
     bluetoothDevice = await navigator.bluetooth.requestDevice({
         // filters: [...] <- Prefer filters to save energy & show relevant devices.
         acceptAllDevices: true,
-        optionalServices: [UUID_KEY_SERV]
+        optionalServices: [UUID_SERV_1]
     });
     bluetoothDevice.addEventListener('gattserverdisconnected', onDisconnected);
 }
@@ -43,15 +62,16 @@ async function connectDeviceAndCacheCharacteristics() {
     const server = await bluetoothDevice.gatt.connect();
 
     log('Getting Key Service...');
-    const service = await server.getPrimaryService(UUID_KEY_SERV);
+    const service = await server.getPrimaryService(UUID_SERV_1);
 
     log('Getting Key Characteristic...');
-    keyCharacteristic = await service.getCharacteristic(UUID_KEY_DATA);
+    readCharacteristic = await service.getCharacteristic(UUID_READ_CHAR);
+    writeCharacteristic = await service.getCharacteristic(UUID_WRITE_CHAR);
 
-    keyCharacteristic.addEventListener('characteristicvaluechanged',
+    readCharacteristic.addEventListener('characteristicvaluechanged',
         handleKeyChanged);
-    document.querySelector('#startNotifications').disabled = false;
-    document.querySelector('#stopNotifications').disabled = true;
+    //document.querySelector('#startNotifications').disabled = false;
+    //document.querySelector('#stopNotifications').disabled = true;
 }
 
 /* This function will be called when `readValue` resolves and
@@ -62,7 +82,7 @@ function handleKeyChanged(event) {
     log('> Key is ' + key);
 }
 
-async function onStartNotificationsButtonClick() {
+/*async function onStartNotificationsButtonClick() {
     try {
         log('Starting Key Notifications...');
         await keyCharacteristic.startNotifications();
@@ -86,13 +106,13 @@ async function onStopNotificationsButtonClick() {
     } catch (error) {
         log('Argh! ' + error);
     }
-}
+}*/
 
 function onResetButtonClick() {
-    if (keyCharacteristic) {
-        keyCharacteristic.removeEventListener('characteristicvaluechanged',
+    if (readCharacteristic) {
+        readCharacteristic.removeEventListener('characteristicvaluechanged',
             handleKeyChanged);
-        keyCharacteristic = null;
+        readCharacteristic = null;
     }
     // Note that it doesn't disconnect device.
     bluetoothDevice = null;
