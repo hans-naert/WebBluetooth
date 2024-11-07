@@ -17,8 +17,8 @@ async function onReadKeyButtonClick() {
         }
         await connectDeviceAndCacheCharacteristics();
 
-        log('Reading Key...');
-        await keyCharacteristic.readValue();
+        //log('Reading Key...');
+        //await keyCharacteristic.readValue();
     } catch (error) {
         log('Argh! ' + error);
     }
